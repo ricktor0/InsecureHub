@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Welcome back, <span class="gradient-text">{{ session.username }}</span>
+            {% if session.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">+ New Post</a>
+        <a href="{{ url_for('upload_file') }}" class="btn btn-ghost btn-sm">↑ Upload File</a>
+        <a href="{{ url_for('new_note') }}" class="btn btn-ghost btn-sm">+ Note</a>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Quick Links -->
+    <div class="dash-card dash-wide">
+        <h2 class="card-title">🛠 Vulnerability Playground</h2>
+        <div class="vuln-grid">
+            <a href="{{ url_for('render_template_page') }}" class="vuln-card">
+                <span class="vuln-icon">🔥</span>
+                <span class="vuln-name">SSTI</span>
+                <span class="vuln-desc">Template Injection</span>
+            </a>
+            <a href="{{ url_for('fetch_url') }}" class="vuln-card">
+                <span class="vuln-icon">🌐</span>
+                <span class="vuln-name">SSRF</span>
+                <span class="vuln-desc">URL Fetcher</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="vuln-card">
+                <span class="vuln-icon">💉</span>
+                <span class="vuln-name">SQLi</span>
+                <span class="vuln-desc">Search Bar</span>
+            </a>
+            <a href="{{ url_for('notes') }}" class="vuln-card">
+                <span class="vuln-icon">🔓</span>
+                <span class="vuln-name">IDOR</span>
+                <span class="vuln-desc">Notes & Files</span>
+            </a>
+            <a href="{{ url_for('read_file') }}" class="vuln-card">
+                <span class="vuln-icon">📂</span>
+                <span class="vuln-name">Path Traversal</span>
+                <span class="vuln-desc">File Reader</span>
+            </a>
+            <a href="{{ url_for('login') }}" class="vuln-card">
+                <span class="vuln-icon">🍪</span>
+                <span class="vuln-name">Pickle RCE</span>
+                <span class="vuln-desc">Remember-Me Cookie</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- My Posts -->
+    <div class="dash-card">
+        <h2 class="card-title">📝 My Posts</h2>
+        {% if posts %}
+        <div class="item-list">
+            {% for post in posts %}
+            <div class="item-row">
+                <div class="item-info">
+                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="item-title">{{ post.title }}</a>
+                    <span class="item-meta">ID: {{ post.id }} · {% if post.is_private %}<span
+                            class="badge-private">Private</span>{% else %}<span class="badge-public">Public</span>{%
+                        endif %}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-sm">No posts yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- My Files -->
+    <div class="dash-card">
+        <h2 class="card-title">📁 My Files</h2>
+        {% if files %}
+        <div class="item-list">
+            {% for file in files %}
+            <div class="item-row">
+                <div class="item-info">
+                    <a href="{{ url_for('download_file', file_id=file.id) }}" class="item-title">{{ file.filename }}</a>
+                    <span class="item-meta">ID: {{ file.id }} · {% if file.is_private %}<span
+                            class="badge-private">Private</span>{% else %}<span class="badge-public">Public</span>{%
+                        endif %}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-sm">No files uploaded.</div>
+        {% endif %}
+    </div>
+
+    <!-- Profile Quick View -->
+    <div class="dash-card">
+        <h2 class="card-title">👤 My Profile</h2>
+        <div class="profile-quick">
+            <div class="avatar avatar-lg">{{ session.username[0]|upper }}</div>
+            <div class="profile-quick-info">
+                <div class="profile-quick-name">{{ session.username }}</div>
+                <div class="profile-quick-role">{{ session.role }}</div>
+            </div>
+        </div>
+        <div class="profile-quick-actions">
+            <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-ghost btn-sm btn-full">View
+                Profile</a>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-ghost btn-sm btn-full">Edit Profile</a>
+            <a href="{{ url_for('render_bio', user_id=session.user_id) }}" class="btn btn-ghost btn-sm btn-full">View
+                Bio (SSTI)</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

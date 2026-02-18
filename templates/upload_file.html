@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Upload File — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Upload File</h1>
+        <p class="page-subtitle">No file type restrictions — upload anything!</p>
+    </div>
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" class="form"
+            id="upload-form">
+            <div class="form-group">
+                <label class="form-label" for="file">Select File</label>
+                <div class="file-drop-zone" id="drop-zone">
+                    <span class="file-drop-icon">📁</span>
+                    <span class="file-drop-text">Drop file here or click to browse</span>
+                    <input type="file" id="file" name="file" class="file-input" />
+                </div>
+                <div class="form-hint">⚠ No file type validation — .py, .sh, .php all accepted</div>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="private" name="private" class="form-checkbox" />
+                <label for="private" class="form-check-label">Private file</label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="upload-btn">Upload File</button>
+                <a href="{{ url_for('files') }}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file');
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) {
+            dropZone.querySelector('.file-drop-text').textContent = fileInput.files[0].name;
+        }
+    });
+</script>
+{% endblock %}

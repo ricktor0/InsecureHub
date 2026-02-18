@@ -1,0 +1,14 @@
+insecurehub.db
+uploads/*.txt
+uploads/*.py
+uploads/*.sh
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.DS_Store

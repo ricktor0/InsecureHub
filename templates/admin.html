@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">⚙ Admin Panel</h1>
+        <p class="page-subtitle">Full system access — admin only</p>
+    </div>
+
+    <div class="admin-grid">
+        <div class="dash-card">
+            <h2 class="card-title">👥 All Users</h2>
+            <div class="item-list">
+                {% for user in users %}
+                <div class="item-row">
+                    <div class="item-info">
+                        <span class="item-title">{{ user.username }}
+                            {% if user.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
+                        </span>
+                        <span class="item-meta">
+                            ID: {{ user.id }} · {{ user.email or 'No email' }}
+                        </span>
+                        <span class="item-meta">
+                            Password hash: <code class="code-inline">{{ user.password }}</code>
+                        </span>
+                    </div>
+                    <div class="item-actions">
+                        <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-ghost btn-xs">Profile</a>
+                        {% if user.id != session.user_id %}
+                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-xs"
+                                onclick="return confirm('Delete user?')">Delete</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <h2 class="card-title">📝 All Posts</h2>
+            <div class="item-list">
+                {% for post in posts %}
+                <div class="item-row">
+                    <div class="item-info">
+                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="item-title">{{ post.title }}</a>
+                        <span class="item-meta">
+                            By: {{ post.username }} · ID: {{ post.id }}
+                            · {% if post.is_private %}<span class="badge-private">Private</span>{% else %}<span
+                                class="badge-public">Public</span>{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dash-card dash-wide">
+            <h2 class="card-title">🔧 Quick Actions</h2>
+            <div class="admin-actions">
+                <a href="{{ url_for('debug_info') }}" class="btn btn-ghost btn-sm">View Debug Info</a>
+                <a href="/api/user/1" class="btn btn-ghost btn-sm">API: User 1</a>
+                <a href="/api/note/1" class="btn btn-ghost btn-sm">API: Note 1</a>
+                <a href="{{ url_for('restore_session') }}" class="btn btn-ghost btn-sm">Restore Session (Pickle)</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

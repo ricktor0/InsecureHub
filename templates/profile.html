@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }}'s Profile — InsecureHub{% endblock %}
+{% block content %}
+<div class="profile-page">
+    <div class="profile-banner"></div>
+    <div class="profile-header">
+        <div class="avatar avatar-xl">{{ profile_user.username[0]|upper }}</div>
+        <div class="profile-info">
+            <h1 class="profile-name">{{ profile_user.username }}
+                {% if profile_user.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
+            </h1>
+            <p class="profile-email">{{ profile_user.email or 'No email set' }}</p>
+            <p class="profile-meta">User ID: <code class="code-inline">{{ profile_user.id }}</code> · Joined {{
+                profile_user.created_at[:10] if profile_user.created_at else 'Unknown' }}</p>
+            <div class="profile-actions">
+                <a href="{{ url_for('render_bio', user_id=profile_user.id) }}" class="btn btn-ghost btn-sm">View Bio</a>
+                {% if session.user_id == profile_user.id %}
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary btn-sm">Edit Profile</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-body">
+        <div class="profile-section">
+            <h2 class="section-title">Bio</h2>
+            <div class="bio-box">{{ profile_user.bio }}</div>
+        </div>
+
+        <div class="profile-section">
+            <h2 class="section-title">Public Posts</h2>
+            {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                <article class="post-card">
+                    <h3 class="post-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
+                    </h3>
+                    <p class="post-preview">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                    <div class="post-footer">
+                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
+                        <span class="post-id">ID: {{ post.id }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">📝</span>
+                <p>No public posts yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- IDOR Hint -->
+        <div class="hint-box hint-vuln">
+            <span class="hint-title">🔍 IDOR Hint</span>
+            <p>Try accessing other user profiles: <code>/profile/1</code>, <code>/profile/2</code>,
+                <code>/profile/3</code></p>
+            <p>Also try: <code>/api/user/1</code> — exposes password hashes!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

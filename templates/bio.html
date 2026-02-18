@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s Bio — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">{{ user.username }}'s Bio</h1>
+        <p class="page-subtitle">Rendered bio — SSTI vulnerability active</p>
+    </div>
+    <div class="form-card">
+        <div class="bio-rendered">
+            {{ rendered_bio | safe }}
+        </div>
+    </div>
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">🔥 SSTI Active</span>
+        <p>This page renders the user's bio as a Jinja2 template. Edit your bio at <a
+                href="{{ url_for('edit_profile') }}">/profile/edit</a> to inject payloads.</p>
+    </div>
+</div>
+{% endblock %}

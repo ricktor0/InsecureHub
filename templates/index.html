@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}InsecureHub — Code Sharing Platform{% endblock %}
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">🔐 Security Learning Platform</div>
+        <h1 class="hero-title">Welcome to <span class="gradient-text">InsecureHub</span></h1>
+        <p class="hero-subtitle">A realistic code sharing platform built for security research and penetration testing
+            practice.</p>
+        {% if not session.user_id %}
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-ghost btn-lg">Sign In</a>
+        </div>
+        {% endif %}
+        <div class="vuln-tags">
+            <span class="vtag vtag-red">IDOR</span>
+            <span class="vtag vtag-orange">SSTI</span>
+            <span class="vtag vtag-yellow">SQLi</span>
+            <span class="vtag vtag-purple">SSRF</span>
+            <span class="vtag vtag-blue">Pickle RCE</span>
+            <span class="vtag vtag-green">Path Traversal</span>
+            <span class="vtag vtag-pink">XSS</span>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+                <span class="terminal-title">exploit.py</span>
+            </div>
+            <div class="terminal-body">
+                <div class="term-line"><span class="term-comment"># SSTI Payload</span></div>
+                <div class="term-line"><span class="term-string">{{ '{{' }}7*7{{ '}}' }}</span> <span
+                        class="term-comment">→ 49</span></div>
+                <div class="term-line term-blank"></div>
+                <div class="term-line"><span class="term-comment"># IDOR</span></div>
+                <div class="term-line"><span class="term-keyword">GET</span> /note/<span class="term-num">1</span></div>
+                <div class="term-line term-blank"></div>
+                <div class="term-line"><span class="term-comment"># SQLi</span></div>
+                <div class="term-line"><span class="term-string">?q=' OR 1=1--</span></div>
+                <div class="term-line term-blank"></div>
+                <div class="term-line"><span class="term-comment"># SSRF</span></div>
+                <div class="term-line"><span class="term-string">url=http://127.0.0.1</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <span class="stat-num">7+</span>
+        <span class="stat-label">Vulnerabilities</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-num">Real</span>
+        <span class="stat-label">World Scenarios</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-num">CTF</span>
+        <span class="stat-label">Style Flags</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-num">Flask</span>
+        <span class="stat-label">Powered</span>
+    </div>
+</div>
+
+<!-- Recent Posts -->
+<section class="section">
+    <div class="section-header">
+        <h2 class="section-title">Recent Posts</h2>
+        {% if session.user_id %}
+        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">+ New Post</a>
+        {% endif %}
+    </div>
+    <div class="posts-grid">
+        {% for post in posts %}
+        <article class="post-card">
+            <div class="post-card-header">
+                <a href="{{ url_for('profile', user_id=post.user_id) }}" class="post-author">
+                    <span class="avatar avatar-sm">{{ post.username[0]|upper }}</span>
+                    {{ post.username }}
+                </a>
+                <span class="post-date">{{ post.created_at[:10] if post.created_at else '' }}</span>
+            </div>
+            <h3 class="post-title">
+                <a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
+            </h3>
+            <p class="post-preview">{{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}</p>
+            <div class="post-footer">
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
+                <span class="post-id">ID: {{ post.id }}</span>
+            </div>
+        </article>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">📝</span>
+            <p>No posts yet. Be the first to share!</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

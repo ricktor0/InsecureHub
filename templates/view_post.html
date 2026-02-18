@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="post-view">
+        <div class="post-view-header">
+            <div class="post-view-meta">
+                <a href="{{ url_for('profile', user_id=post.user_id) }}" class="post-author">
+                    <span class="avatar avatar-sm">{{ post.username[0]|upper }}</span>
+                    {{ post.username }}
+                </a>
+                <span class="post-date">{{ post.created_at[:10] if post.created_at else '' }}</span>
+                <span class="post-id">Post ID: <code class="code-inline">{{ post.id }}</code></span>
+                {% if post.is_private %}<span class="badge-private">Private</span>{% endif %}
+            </div>
+            <h1 class="post-view-title">{{ post.title }}</h1>
+        </div>
+        <div class="post-view-body">
+            <!-- VULN: XSS — content rendered without sanitization -->
+            {{ post.content | safe }}
+        </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="comments-section">
+        <h2 class="section-title">Comments ({{ comments|length }})</h2>
+        {% if comments %}
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment-card">
+                <div class="comment-header">
+                    <span class="comment-author">
+                        <span class="avatar avatar-xs">{{ comment.username[0]|upper }}</span>
+                        {{ comment.username }}
+                    </span>
+                    <span class="comment-date">{{ comment.created_at[:10] if comment.created_at else '' }}</span>
+                </div>
+                <!-- VULN: Stored XSS -->
+                <div class="comment-body">{{ comment.content | safe }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-sm">No comments yet.</div>
+        {% endif %}
+
+        {% if session.user_id %}
+        <div class="comment-form-wrap">
+            <h3 class="comment-form-title">Add Comment</h3>
+            <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}" class="form" id="comment-form">
+                <div class="form-group">
+                    <textarea name="content" class="form-textarea" rows="3"
+                        placeholder="Write a comment... (XSS payloads work here!)"></textarea>
+                    <div class="form-hint">⚠ Comments are not sanitized — try:
+                        <code>&lt;script&gt;alert(1)&lt;/script&gt;</code></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" id="submit-comment-btn">Post Comment</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">🔓 IDOR Hint</span>
+        <p>Private posts are still accessible by ID. Try: <code>/post/2</code> (admin's private post)</p>
+    </div>
+</div>
+{% endblock %}

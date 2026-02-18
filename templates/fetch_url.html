@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}URL Fetcher — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">🌐 URL Fetcher</h1>
+        <p class="page-subtitle">Fetch any URL — SSRF vulnerability active</p>
+    </div>
+
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('fetch_url') }}" class="form" id="fetch-form">
+            <div class="form-group">
+                <label class="form-label" for="url">Target URL</label>
+                <input type="text" id="url" name="url" class="form-input"
+                    placeholder="https://example.com or http://127.0.0.1:5000/debug" value="{{ url }}" />
+                <div class="form-hint">Fetches the URL server-side. Try internal addresses!</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="fetch-btn">Fetch URL</button>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="result-card result-error">
+        <div class="result-header">
+            <span class="result-title">❌ Error</span>
+        </div>
+        <pre class="result-body">{{ error }}</pre>
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div class="result-card">
+        <div class="result-header">
+            <span class="result-title">✅ Response from: {{ url }}</span>
+        </div>
+        <pre class="result-body">{{ result }}</pre>
+    </div>
+    {% endif %}
+
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">🌐 SSRF Payloads to Try</span>
+        <div class="payload-list">
+            <code>http://127.0.0.1:5000/debug</code>
+            <code>http://localhost:5000/api/user/1</code>
+            <code>http://127.0.0.1:5000/admin</code>
+            <code>file:///etc/passwd</code>
+            <code>http://169.254.169.254/latest/meta-data/</code>
+            <code>http://0.0.0.0:5000/debug</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

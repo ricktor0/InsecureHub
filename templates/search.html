@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Search — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Search Posts</h1>
+        <p class="page-subtitle">Search through public posts — SQL injection vulnerability active</p>
+    </div>
+
+    <div class="search-bar-wrap">
+        <form method="GET" action="{{ url_for('search') }}" class="search-form" id="search-form">
+            <input type="text" name="q" id="search-input" class="search-input"
+                placeholder="Search posts... try: ' OR 1=1--" value="{{ query }}" />
+            <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
+        </form>
+    </div>
+
+    {% if query %}
+    <div class="search-meta">
+        Results for: <strong>"{{ query }}"</strong>
+        {% if results %}— {{ results|length }} found{% endif %}
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <div class="posts-grid">
+        {% for post in results %}
+        <article class="post-card">
+            <div class="post-card-header">
+                <span class="post-author">{{ post.username }}</span>
+                <span class="post-date">{{ post.created_at[:10] if post.created_at else '' }}</span>
+            </div>
+            <h3 class="post-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a></h3>
+            <p class="post-preview">{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
+            <div class="post-footer">
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
+                <span class="post-id">ID: {{ post.id }}</span>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% elif query %}
+    <div class="empty-state">
+        <span class="empty-icon">🔍</span>
+        <p>No results found for "{{ query }}"</p>
+    </div>
+    {% endif %}
+
+    <div class="hint-box hint-vuln">
+        <span class="hint-title">💉 SQLi Payloads to Try</span>
+        <div class="payload-list">
+            <code>' OR 1=1--</code>
+            <code>' UNION SELECT 1,2,3,4,5,6,7--</code>
+            <code>' UNION SELECT username,password,email,4,5,6,7 FROM users--</code>
+            <code>' AND 1=2 UNION SELECT id,username,password,email,bio,role,reset_token FROM users--</code>
+        </div>
+    </div>
+</div>
+{% endblock %}

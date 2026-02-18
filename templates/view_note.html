@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} — InsecureHub{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">{{ note.title }}</h1>
+        <div class="page-meta">
+            Note ID: <code class="code-inline">{{ note.id }}</code>
+            · Owner ID: <code class="code-inline">{{ note.user_id }}</code>
+            · {% if note.is_private %}<span class="badge-private">Private</span>{% else %}<span
+                class="badge-public">Public</span>{% endif %}
+        </div>
+    </div>
+    <div class="form-card">
+        <div class="note-content">{{ note.content }}</div>
+    </div>
+    <div class="page-actions" style="margin-top:1rem;">
+        <a href="{{ url_for('notes') }}" class="btn btn-ghost btn-sm">← Back to Notes</a>
+    </div>
+</div>
+{% endblock %}

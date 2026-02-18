@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Login — InsecureHub{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="auth-icon">🔑</span>
+            <h1 class="auth-title">Sign In</h1>
+            <p class="auth-subtitle">Welcome back to InsecureHub</p>
+        </div>
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form" id="login-form">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Enter username"
+                    required autocomplete="username" />
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Enter password"
+                    required autocomplete="current-password" />
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="remember" name="remember" class="form-checkbox" />
+                <label for="remember" class="form-check-label">
+                    Remember me <span class="hint">(uses serialized cookie)</span>
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="login-btn">Sign In</button>
+        </form>
+        <div class="auth-footer">
+            <a href="{{ url_for('forgot_password') }}" class="auth-link">Forgot password?</a>
+            <span class="auth-sep">·</span>
+            <a href="{{ url_for('register') }}" class="auth-link">Create account</a>
+        </div>
+        <div class="hint-box">
+            <span class="hint-title">🧪 Test Credentials</span>
+            <div class="hint-creds">
+                <code>admin / admin123</code>
+                <code>alice / password123</code>
+                <code>bob / bob123</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
