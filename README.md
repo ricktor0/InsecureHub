@@ -1,7 +1,6 @@
 # InsecureHub
 
-A deliberately vulnerable Flask app for learning web pentesting. Simulates a code-sharing platform with intentional security flaws covering OWASP Top 10 and common CTF categories.
-
+InsecureHub is an intentionally vulnerable Flask app for learning web application penetration testing
 ---
 
 ## Setup
@@ -52,5 +51,6 @@ InsecureHub/
 ```
 
 ---
+
 
 **Resources:** [OWASP Top 10](https://owasp.org/www-project-top-ten/) · [PortSwigger Academy](https://portswigger.net/web-security) · [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
