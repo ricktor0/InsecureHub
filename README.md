@@ -1,8 +1,6 @@
 # InsecureHub 🔐
 
-> **⚠️ FOR EDUCATIONAL PURPOSES ONLY. DO NOT DEPLOY IN PRODUCTION.**
-
-A deliberately vulnerable Flask web application designed for learning web application penetration testing. Built to simulate a real-world code-sharing platform (like GitHub/Pastebin) with intentional security flaws.
+deliberately vulnerable Flask web application designed for learning web application penetration testing. Built to simulate a real-world code-sharing platform (like GitHub/Pastebin) with intentional security flaws.
 
 ---
 
@@ -330,3 +328,4 @@ This application is **intentionally vulnerable** and is designed **solely for ed
 - [PortSwigger Web Security Academy](https://portswigger.net/web-security)
 - [HackTricks](https://book.hacktricks.xyz/)
 - [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
+
