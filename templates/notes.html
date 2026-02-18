@@ -1,41 +1,45 @@
 {% extends "base.html" %}
-{% block title %}Notes — InsecureHub{% endblock %}
+{% block title %}Notes — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container">
     <div class="page-header">
-        <h1 class="page-title">📋 My Notes</h1>
-        <div class="page-actions">
-            <a href="{{ url_for('new_note') }}" class="btn btn-primary btn-sm">+ New Note</a>
+        <div>
+            <h1 class="page-title">Notes</h1>
+            <div class="page-subtitle">Your personal notes and drafts</div>
         </div>
+        <a href="{{ url_for('new_note') }}" class="btn btn-primary btn-sm">New note</a>
     </div>
 
     {% if notes %}
-    <div class="item-list-card">
+    <div class="item-list">
+        <div class="item-list-header">
+            <span>{{ notes|length }} note{% if notes|length != 1 %}s{% endif %}</span>
+        </div>
         {% for note in notes %}
         <div class="item-row">
-            <div class="item-info">
-                <a href="{{ url_for('view_note', note_id=note.id) }}" class="item-title">{{ note.title }}</a>
-                <span class="item-meta">
-                    ID: <code class="code-inline">{{ note.id }}</code>
-                    · {% if note.is_private %}<span class="badge-private">Private</span>{% else %}<span
-                        class="badge-public">Public</span>{% endif %}
-                </span>
+            <div class="item-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M0 3.75C0 2.784.784 2 1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25Zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25ZM3.5 6.25a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Zm.75 2.25h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z" />
+                </svg>
             </div>
-            <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-ghost btn-xs">View →</a>
+            <div style="flex:1;min-width:0;">
+                <div class="item-name"><a href="{{ url_for('view_note', note_id=note.id) }}">{{ note.title }}</a></div>
+                <div class="text-xs text-muted mt-1">
+                    {% if note.is_private %}<span class="label label-gray">Private</span>{% else %}<span
+                        class="label label-green">Public</span>{% endif %}
+                </div>
+            </div>
+            <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-default btn-sm">Open</a>
         </div>
         {% endfor %}
     </div>
     {% else %}
     <div class="empty-state">
-        <span class="empty-icon">📋</span>
-        <p>No notes yet. Create your first note!</p>
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-title">No notes yet</div>
+        <div class="empty-state-desc">Create your first note to get started.</div>
     </div>
     {% endif %}
-
-    <div class="hint-box hint-vuln">
-        <span class="hint-title">🔓 IDOR Hint</span>
-        <p>Try accessing notes by ID: <code>/note/1</code> — admin's private note!</p>
-        <p>Also try the API: <code>/api/note/1</code></p>
-    </div>
 </div>
 {% endblock %}

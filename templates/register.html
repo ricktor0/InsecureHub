@@ -1,33 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Register — InsecureHub{% endblock %}
+{% block title %}Create your account — DevVault{% endblock %}
 {% block content %}
 <div class="auth-page">
-    <div class="auth-card">
-        <div class="auth-header">
-            <span class="auth-icon">✨</span>
-            <h1 class="auth-title">Create Account</h1>
-            <p class="auth-subtitle">Join the InsecureHub community</p>
+    <div class="auth-box">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
+                </svg>
+            </div>
+            <h1 class="auth-title">Create your account</h1>
         </div>
-        <form method="POST" action="{{ url_for('register') }}" class="auth-form" id="register-form">
-            <div class="form-group">
-                <label class="form-label" for="username">Username</label>
-                <input type="text" id="username" name="username" class="form-input" placeholder="Choose a username"
-                    required />
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" />
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-input" placeholder="Choose a password"
-                    required />
-            </div>
-            <button type="submit" class="btn btn-primary btn-full" id="register-btn">Create Account</button>
-        </form>
+
+        <div class="auth-card">
+            <form method="POST" action="{{ url_for('register') }}" id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" autofocus
+                        autocomplete="username" required />
+                    <div class="form-hint">Username may only contain alphanumeric characters or hyphens.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email address <span
+                            class="form-label-optional">(optional)</span></label>
+                    <input type="email" id="email" name="email" class="form-input" autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" autocomplete="new-password"
+                        required />
+                    <div class="form-hint">Use at least 8 characters.</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="register-btn">Create account</button>
+            </form>
+        </div>
+
         <div class="auth-footer">
-            Already have an account?
-            <a href="{{ url_for('login') }}" class="auth-link">Sign in</a>
+            Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
         </div>
     </div>
 </div>

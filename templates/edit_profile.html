@@ -1,37 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Edit Profile — InsecureHub{% endblock %}
+{% block title %}Edit profile — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container-md">
     <div class="page-header">
-        <h1 class="page-title">Edit Profile</h1>
-        <p class="page-subtitle">Update your profile information</p>
+        <h1 class="page-title">Public profile</h1>
     </div>
 
-    <div class="form-card">
-        <form method="POST" action="{{ url_for('edit_profile') }}" class="form">
-            <div class="form-group">
-                <label class="form-label" for="bio">Bio</label>
-                <textarea id="bio" name="bio" class="form-textarea" rows="6"
-                    placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
-                <div class="form-hint">
-                    ⚠ Your bio is rendered as a Jinja2 template. Try: <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
+    <div class="layout-with-sidebar" style="grid-template-columns:200px 1fr;">
+        <!-- Settings nav -->
+        <div>
+            <div
+                style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);padding:0.375rem 0.75rem;margin-bottom:0.25rem;">
+                Settings</div>
+            <a href="{{ url_for('edit_profile') }}"
+                style="display:block;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:600;background:var(--accent);color:white;border-radius:var(--radius-md);text-decoration:none;margin-bottom:0.125rem;">Profile</a>
+            <a href="{{ url_for('dashboard') }}"
+                style="display:block;padding:0.375rem 0.75rem;font-size:0.875rem;color:var(--text-secondary);border-radius:var(--radius-md);text-decoration:none;">Dashboard</a>
+        </div>
+
+        <!-- Form -->
+        <div>
+            <form method="POST" action="{{ url_for('edit_profile') }}">
+                <div class="form-group">
+                    <label class="form-label" for="bio">Bio</label>
+                    <textarea id="bio" name="bio" class="form-textarea" rows="5"
+                        placeholder="Tell us a little bit about yourself">{{ user.bio or '' }}</textarea>
+                    <div class="form-hint">You can use Markdown syntax in your bio. Bio is rendered on your public
+                        profile.</div>
                 </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
-                <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-ghost">Cancel</a>
-            </div>
-        </form>
-    </div>
 
-    <div class="hint-box hint-vuln">
-        <span class="hint-title">🔥 SSTI Payloads to Try</span>
-        <div class="payload-list">
-            <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
-            <code>{{ '{{' }} config {{ '}}' }}</code>
-            <code>{{ '{{' }} config.SECRET_KEY {{ '}}' }}</code>
-            <code>{{ '{%' }} for x in range(10) {{ '%}' }}{{ '{{' }}x{{ '}}' }}{{ '{%' }} endfor {{ '%}' }}</code>
-            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__() {{ '}}' }}</code>
+                <hr class="divider" />
+
+                <div class="d-flex gap-sm">
+                    <button type="submit" class="btn btn-primary" id="save-profile-btn">Update profile</button>
+                    <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-default">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>

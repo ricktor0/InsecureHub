@@ -1,17 +1,8 @@
 """
-InsecureHub - A Deliberately Vulnerable Flask Web Application
-=============================================================
-FOR EDUCATIONAL PURPOSES ONLY. DO NOT DEPLOY IN PRODUCTION.
-
-Vulnerabilities included:
-  [1] IDOR   - Insecure Direct Object Reference (profile/file access)
-  [2] SSTI   - Server-Side Template Injection (custom bio renderer)
-  [3] SSRF   - Server-Side Request Forgery (URL fetcher feature)
-  [4] Pickle - Deserialization RCE (remember-me cookie)
-  [5] SQLi   - SQL Injection (search feature)
-  [6] Broken Auth - Weak session / password reset token
-  [7] Path Traversal - File download endpoint
-  [8] XSS    - Stored XSS in posts/comments
+DevVault - Developer Code Sharing Platform
+==========================================
+A platform for developers to share code snippets, collaborate,
+and manage files and notes.
 """
 
 import os
@@ -34,7 +25,7 @@ from flask import (
 #  App Config
 # ─────────────────────────────────────────────
 app = Flask(__name__)
-app.secret_key = "supersecretkey123"          # VULN: Hardcoded weak secret
+app.secret_key = "supersecretkey123"
 DATABASE = "insecurehub.db"
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -113,7 +104,7 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 "admin",
-                hashlib.md5(b"admin123").hexdigest(),   # VULN: MD5 password hashing
+                hashlib.md5(b"admin123").hexdigest(),
                 "admin@insecurehub.local",
                 "I am the administrator.",
                 "admin",
@@ -210,7 +201,7 @@ def admin_required(f):
     return decorated
 
 def hash_password(pw):
-    return hashlib.md5(pw.encode()).hexdigest()   # VULN: MD5
+    return hashlib.md5(pw.encode()).hexdigest()
 
 # ─────────────────────────────────────────────
 #  Routes: Public
@@ -252,7 +243,7 @@ def login():
         password = request.form.get("password", "")
 
         db = get_db()
-        # VULN: No rate limiting, no lockout
+
         user = db.execute(
             "SELECT * FROM users WHERE username=? AND password=?",
             (username, hash_password(password))
@@ -263,7 +254,7 @@ def login():
             session["username"] = user["username"]
             session["role"]     = user["role"]
 
-            # VULN: Pickle deserialization in remember-me cookie
+
             if request.form.get("remember"):
                 user_data = {"user_id": user["id"], "username": user["username"], "role": user["role"]}
                 remember_cookie = base64.b64encode(pickle.dumps(user_data)).decode()
@@ -300,12 +291,12 @@ def dashboard():
     return render_template("dashboard.html", posts=posts, files=files)
 
 # ─────────────────────────────────────────────
-#  Routes: Profile — VULN: IDOR
+#  Routes: Profile
 # ─────────────────────────────────────────────
 @app.route("/profile/<int:user_id>")
 def profile(user_id):
     db = get_db()
-    # VULN: No authorization check — any user_id works
+
     user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
     if not user:
         flash("User not found.", "danger")
@@ -321,7 +312,7 @@ def edit_profile():
     db = get_db()
     if request.method == "POST":
         bio = request.form.get("bio", "")
-        # VULN: SSTI — bio is rendered as a Jinja2 template
+
         db.execute("UPDATE users SET bio=? WHERE id=?", (bio, session["user_id"]))
         db.commit()
         flash("Profile updated!", "success")
@@ -352,7 +343,7 @@ def new_post():
 @app.route("/post/<int:post_id>")
 def view_post(post_id):
     db = get_db()
-    # VULN: IDOR — private posts accessible by ID without auth check
+
     post = db.execute(
         "SELECT p.*, u.username FROM posts p JOIN users u ON p.user_id=u.id WHERE p.id=?",
         (post_id,)
@@ -369,7 +360,7 @@ def view_post(post_id):
 @app.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required
 def add_comment(post_id):
-    # VULN: Stored XSS — content not sanitized
+
     content = request.form.get("content", "")
     db = get_db()
     db.execute(
@@ -381,7 +372,7 @@ def add_comment(post_id):
     return redirect(url_for("view_post", post_id=post_id))
 
 # ─────────────────────────────────────────────
-#  Routes: Notes — VULN: IDOR
+#  Routes: Notes
 # ─────────────────────────────────────────────
 @app.route("/notes")
 @login_required
@@ -394,7 +385,7 @@ def notes():
 @login_required
 def view_note(note_id):
     db = get_db()
-    # VULN: IDOR — no ownership check
+
     note = db.execute("SELECT * FROM notes WHERE id=?", (note_id,)).fetchone()
     if not note:
         flash("Note not found.", "danger")
@@ -419,7 +410,7 @@ def new_note():
     return render_template("new_note.html")
 
 # ─────────────────────────────────────────────
-#  Routes: Search — VULN: SQL Injection
+#  Routes: Search
 # ─────────────────────────────────────────────
 @app.route("/search")
 def search():
@@ -427,7 +418,6 @@ def search():
     results = []
     if query:
         db = get_db()
-        # VULN: Raw string interpolation = SQL injection
         try:
             raw_sql = f"SELECT p.*, u.username FROM posts p JOIN users u ON p.user_id=u.id WHERE p.title LIKE '%{query}%' AND p.is_private=0"
             results = db.execute(raw_sql).fetchall()
@@ -436,7 +426,7 @@ def search():
     return render_template("search.html", results=results, query=query)
 
 # ─────────────────────────────────────────────
-#  Routes: File Download — VULN: Path Traversal + IDOR
+#  Routes: Files
 # ─────────────────────────────────────────────
 @app.route("/files")
 @login_required
@@ -452,7 +442,7 @@ def files():
 @login_required
 def download_file(file_id):
     db = get_db()
-    # VULN: IDOR — no ownership check on private files
+
     file_rec = db.execute("SELECT * FROM files WHERE id=?", (file_id,)).fetchone()
     if not file_rec:
         flash("File not found.", "danger")
@@ -462,7 +452,7 @@ def download_file(file_id):
 @app.route("/file/read")
 @login_required
 def read_file():
-    # VULN: Path Traversal — filename param not sanitized
+
     filename = request.args.get("name", "")
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     try:
@@ -481,7 +471,7 @@ def upload_file():
         if not f or f.filename == "":
             flash("No file selected.", "danger")
             return redirect(url_for("upload_file"))
-        # VULN: No file type validation — allows .py, .sh, etc.
+
         filename = f.filename
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         f.save(filepath)
@@ -497,7 +487,7 @@ def upload_file():
     return render_template("upload_file.html")
 
 # ─────────────────────────────────────────────
-#  Routes: URL Fetcher — VULN: SSRF
+#  Routes: URL Fetcher
 # ─────────────────────────────────────────────
 @app.route("/fetch", methods=["GET", "POST"])
 @login_required
@@ -508,7 +498,7 @@ def fetch_url():
     if request.method == "POST":
         url = request.form.get("url", "")
         try:
-            # VULN: SSRF — fetches any URL including internal ones
+
             resp = requests.get(url, timeout=5, allow_redirects=True)
             result = resp.text[:5000]
         except Exception as e:
@@ -516,7 +506,7 @@ def fetch_url():
     return render_template("fetch_url.html", result=result, error=error, url=url)
 
 # ─────────────────────────────────────────────
-#  Routes: Template Renderer — VULN: SSTI
+#  Routes: Template Renderer
 # ─────────────────────────────────────────────
 @app.route("/render", methods=["GET", "POST"])
 @login_required
@@ -526,14 +516,14 @@ def render_template_page():
     if request.method == "POST":
         template_input = request.form.get("template", "")
         try:
-            # VULN: SSTI — user input rendered directly as Jinja2 template
+
             output = render_template_string(template_input)
         except Exception as e:
             output = f"Template Error: {e}"
     return render_template("render_template.html", output=output, template_input=template_input)
 
 # ─────────────────────────────────────────────
-#  Routes: Profile Bio Viewer — VULN: SSTI
+#  Routes: Profile Bio Viewer
 # ─────────────────────────────────────────────
 @app.route("/bio/<int:user_id>")
 def render_bio(user_id):
@@ -541,12 +531,12 @@ def render_bio(user_id):
     user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
     if not user:
         return "User not found", 404
-    # VULN: SSTI — bio stored in DB and rendered as template
+
     rendered_bio = render_template_string(user["bio"])
     return render_template("bio.html", user=user, rendered_bio=rendered_bio)
 
 # ─────────────────────────────────────────────
-#  Routes: Pickle Cookie — VULN: Deserialization RCE
+#  Routes: Session Restore
 # ─────────────────────────────────────────────
 @app.route("/restore-session")
 def restore_session():
@@ -554,7 +544,7 @@ def restore_session():
     cookie = request.cookies.get("remember_me")
     if cookie:
         try:
-            # VULN: Pickle deserialization of user-controlled cookie
+
             data = pickle.loads(base64.b64decode(cookie))
             session["user_id"]  = data.get("user_id")
             session["username"] = data.get("username")
@@ -565,7 +555,7 @@ def restore_session():
     return redirect(url_for("dashboard"))
 
 # ─────────────────────────────────────────────
-#  Routes: Password Reset — VULN: Weak Token
+#  Routes: Password Reset
 # ─────────────────────────────────────────────
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -574,11 +564,10 @@ def forgot_password():
         db = get_db()
         user = db.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
         if user:
-            # VULN: Predictable reset token (MD5 of username)
             token = hashlib.md5(username.encode()).hexdigest()
             db.execute("UPDATE users SET reset_token=? WHERE username=?", (token, username))
             db.commit()
-            flash(f"Reset token (check email): {token}", "info")
+            flash("If that account exists, a reset link has been sent to the associated email address.", "info")
         else:
             flash("User not found.", "danger")
     return render_template("forgot_password.html")
@@ -626,12 +615,12 @@ def delete_user(user_id):
     return redirect(url_for("admin_panel"))
 
 # ─────────────────────────────────────────────
-#  Routes: API — VULN: IDOR via API
+#  Routes: API
 # ─────────────────────────────────────────────
 @app.route("/api/user/<int:user_id>")
 def api_user(user_id):
     db = get_db()
-    # VULN: IDOR — exposes all user data including password hash and email
+
     user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
     if not user:
         return jsonify({"error": "Not found"}), 404
@@ -640,18 +629,16 @@ def api_user(user_id):
 @app.route("/api/note/<int:note_id>")
 def api_note(note_id):
     db = get_db()
-    # VULN: IDOR — no auth check
     note = db.execute("SELECT * FROM notes WHERE id=?", (note_id,)).fetchone()
     if not note:
         return jsonify({"error": "Not found"}), 404
     return jsonify(dict(note))
 
 # ─────────────────────────────────────────────
-#  Routes: Debug / Info Disclosure
+#  Routes: System Info
 # ─────────────────────────────────────────────
 @app.route("/debug")
 def debug_info():
-    # VULN: Information disclosure — exposes env, config, session
     info = {
         "secret_key": app.secret_key,
         "database": DATABASE,

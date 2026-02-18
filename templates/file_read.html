@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}File Contents — InsecureHub{% endblock %}
+{% block title %}{{ filename }} — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container-md">
     <div class="page-header">
-        <h1 class="page-title">📖 File: {{ filename }}</h1>
-        <p class="page-subtitle">Path Traversal vulnerability active</p>
-    </div>
-    <div class="result-card">
-        <div class="result-header">
-            <span class="result-title">File Contents</span>
-            <code class="code-inline">uploads/{{ filename }}</code>
+        <div>
+            <h1 class="page-title">{{ filename }}</h1>
+            <div class="page-subtitle">File contents</div>
         </div>
-        <pre class="result-body">{{ content }}</pre>
+        <a href="{{ url_for('files') }}" class="btn btn-default btn-sm">← Files</a>
     </div>
-    <div class="page-actions" style="margin-top:1rem;">
-        <a href="{{ url_for('files') }}" class="btn btn-ghost btn-sm">← Back to Files</a>
+
+    <div class="code-block">
+        <div class="code-block-header">
+            <span>{{ filename }}</span>
+        </div>
+        <div class="code-block-body">{{ content }}</div>
     </div>
 </div>
 {% endblock %}

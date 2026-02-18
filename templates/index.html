@@ -1,110 +1,135 @@
 {% extends "base.html" %}
-{% block title %}InsecureHub — Code Sharing Platform{% endblock %}
+{% block title %}DevVault — Where developers share code{% endblock %}
 {% block content %}
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-badge">🔐 Security Learning Platform</div>
-        <h1 class="hero-title">Welcome to <span class="gradient-text">InsecureHub</span></h1>
-        <p class="hero-subtitle">A realistic code sharing platform built for security research and penetration testing
-            practice.</p>
-        {% if not session.user_id %}
+<div class="container">
+
+    {% if not session.user_id %}
+    <!-- Hero for logged-out users -->
+    <div class="hero">
+        <h1 class="hero-title">Where developers share and discover code</h1>
+        <p class="hero-subtitle">DevVault is a platform for hosting code snippets, collaborating on projects, and
+            sharing knowledge with the developer community.</p>
         <div class="hero-actions">
-            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
-            <a href="{{ url_for('login') }}" class="btn btn-ghost btn-lg">Sign In</a>
-        </div>
-        {% endif %}
-        <div class="vuln-tags">
-            <span class="vtag vtag-red">IDOR</span>
-            <span class="vtag vtag-orange">SSTI</span>
-            <span class="vtag vtag-yellow">SQLi</span>
-            <span class="vtag vtag-purple">SSRF</span>
-            <span class="vtag vtag-blue">Pickle RCE</span>
-            <span class="vtag vtag-green">Path Traversal</span>
-            <span class="vtag vtag-pink">XSS</span>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Create a free account</a>
+            <a href="{{ url_for('login') }}" class="btn btn-default btn-lg">Sign in</a>
         </div>
     </div>
-    <div class="hero-visual">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-                <span class="terminal-title">exploit.py</span>
+    {% endif %}
+
+    <div class="layout-with-sidebar">
+        <!-- Main Feed -->
+        <div>
+            <div class="page-header" style="margin-bottom:1rem;">
+                <div>
+                    <h2 class="page-title" style="font-size:1rem;">Recent Snippets</h2>
+                </div>
+                {% if session.user_id %}
+                <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">New snippet</a>
+                {% endif %}
             </div>
-            <div class="terminal-body">
-                <div class="term-line"><span class="term-comment"># SSTI Payload</span></div>
-                <div class="term-line"><span class="term-string">{{ '{{' }}7*7{{ '}}' }}</span> <span
-                        class="term-comment">→ 49</span></div>
-                <div class="term-line term-blank"></div>
-                <div class="term-line"><span class="term-comment"># IDOR</span></div>
-                <div class="term-line"><span class="term-keyword">GET</span> /note/<span class="term-num">1</span></div>
-                <div class="term-line term-blank"></div>
-                <div class="term-line"><span class="term-comment"># SQLi</span></div>
-                <div class="term-line"><span class="term-string">?q=' OR 1=1--</span></div>
-                <div class="term-line term-blank"></div>
-                <div class="term-line"><span class="term-comment"># SSRF</span></div>
-                <div class="term-line"><span class="term-string">url=http://127.0.0.1</span></div>
+
+            {% if posts %}
+            <div class="item-list">
+                <div class="item-list-header">
+                    <span>{{ posts|length }} snippet{% if posts|length != 1 %}s{% endif %}</span>
+                </div>
+                {% for post in posts %}
+                <div class="item-row">
+                    <div class="item-icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path
+                                d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 11 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688Z" />
+                        </svg>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="item-name">
+                            <a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
+                        </div>
+                        <div class="text-sm text-muted mt-1">
+                            <a href="{{ url_for('profile', user_id=post.user_id) }}"
+                                style="color:var(--text-secondary);">{{ post.username }}</a>
+                            &nbsp;·&nbsp;
+                            {{ post.created_at[:10] if post.created_at else '' }}
+                        </div>
+                    </div>
+                    <div class="item-meta-right">
+                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-default btn-sm">View</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📄</div>
+                <div class="empty-state-title">No snippets yet</div>
+                <div class="empty-state-desc">Be the first to share a code snippet.</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            {% if session.user_id %}
+            <div class="sidebar-section">
+                <div class="sidebar-header">Your account</div>
+                <div class="sidebar-body">
+                    <div class="d-flex align-center gap-sm mb-2">
+                        <div class="avatar avatar-md">{{ session.username[0]|upper }}</div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.875rem;">{{ session.username }}</div>
+                            <div class="text-sm text-muted">{{ session.role|capitalize }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-default btn-sm btn-full mb-1">Dashboard</a>
+                    <a href="{{ url_for('profile', user_id=session.user_id) }}"
+                        class="btn btn-default btn-sm btn-full">Your profile</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">Explore</div>
+                <div class="sidebar-body" style="padding:0;">
+                    <a href="{{ url_for('search') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">Search snippets</span>
+                    </a>
+                    <a href="{{ url_for('fetch_url') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">URL Previewer</span>
+                    </a>
+                    <a href="{{ url_for('render_template_page') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">Template Renderer</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">About DevVault</div>
+                <div class="sidebar-body">
+                    <p style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">
+                        DevVault helps developers store, share, and discover code snippets. Create an account to get
+                        started.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Stats bar -->
-<div class="stats-bar">
-    <div class="stat-item">
-        <span class="stat-num">7+</span>
-        <span class="stat-label">Vulnerabilities</span>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-        <span class="stat-num">Real</span>
-        <span class="stat-label">World Scenarios</span>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-        <span class="stat-num">CTF</span>
-        <span class="stat-label">Style Flags</span>
-    </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-        <span class="stat-num">Flask</span>
-        <span class="stat-label">Powered</span>
-    </div>
-</div>
-
-<!-- Recent Posts -->
-<section class="section">
-    <div class="section-header">
-        <h2 class="section-title">Recent Posts</h2>
-        {% if session.user_id %}
-        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">+ New Post</a>
-        {% endif %}
-    </div>
-    <div class="posts-grid">
-        {% for post in posts %}
-        <article class="post-card">
-            <div class="post-card-header">
-                <a href="{{ url_for('profile', user_id=post.user_id) }}" class="post-author">
-                    <span class="avatar avatar-sm">{{ post.username[0]|upper }}</span>
-                    {{ post.username }}
-                </a>
-                <span class="post-date">{{ post.created_at[:10] if post.created_at else '' }}</span>
-            </div>
-            <h3 class="post-title">
-                <a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
-            </h3>
-            <p class="post-preview">{{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}</p>
-            <div class="post-footer">
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
-                <span class="post-id">ID: {{ post.id }}</span>
-            </div>
-        </article>
-        {% else %}
-        <div class="empty-state">
-            <span class="empty-icon">📝</span>
-            <p>No posts yet. Be the first to share!</p>
-        </div>
-        {% endfor %}
-    </div>
-</section>
 {% endblock %}

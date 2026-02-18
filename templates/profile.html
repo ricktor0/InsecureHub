@@ -1,62 +1,90 @@
 {% extends "base.html" %}
-{% block title %}{{ profile_user.username }}'s Profile — InsecureHub{% endblock %}
+{% block title %}{{ profile_user.username }} — DevVault{% endblock %}
 {% block content %}
-<div class="profile-page">
-    <div class="profile-banner"></div>
-    <div class="profile-header">
-        <div class="avatar avatar-xl">{{ profile_user.username[0]|upper }}</div>
-        <div class="profile-info">
-            <h1 class="profile-name">{{ profile_user.username }}
-                {% if profile_user.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
-            </h1>
-            <p class="profile-email">{{ profile_user.email or 'No email set' }}</p>
-            <p class="profile-meta">User ID: <code class="code-inline">{{ profile_user.id }}</code> · Joined {{
-                profile_user.created_at[:10] if profile_user.created_at else 'Unknown' }}</p>
-            <div class="profile-actions">
-                <a href="{{ url_for('render_bio', user_id=profile_user.id) }}" class="btn btn-ghost btn-sm">View Bio</a>
-                {% if session.user_id == profile_user.id %}
-                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary btn-sm">Edit Profile</a>
+<div class="container">
+    <div class="profile-layout">
+        <!-- Left sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-avatar-wrap">
+                <div class="avatar avatar-xl" style="border-radius:var(--radius-xl);">{{ profile_user.username[0]|upper
+                    }}</div>
+            </div>
+            <div class="profile-name">{{ profile_user.username }}</div>
+            <div class="profile-username" style="color:var(--text-secondary);font-size:1rem;margin-bottom:0.75rem;">
+                {% if profile_user.role == 'admin' %}<span class="label label-purple">Admin</span>{% endif %}
+            </div>
+
+            {% if session.user_id == profile_user.id %}
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-default btn-sm btn-full mb-2">Edit profile</a>
+            {% endif %}
+
+            <div class="profile-meta-list">
+                {% if profile_user.email %}
+                <div class="profile-meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                        style="color:var(--text-muted);flex-shrink:0;">
+                        <path
+                            d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z" />
+                    </svg>
+                    <span>{{ profile_user.email }}</span>
+                </div>
                 {% endif %}
+                <div class="profile-meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                        style="color:var(--text-muted);flex-shrink:0;">
+                        <path
+                            d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Z" />
+                    </svg>
+                    <span>Joined {{ profile_user.created_at[:10] if profile_user.created_at else 'Unknown' }}</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="profile-body">
-        <div class="profile-section">
-            <h2 class="section-title">Bio</h2>
-            <div class="bio-box">{{ profile_user.bio }}</div>
-        </div>
+        <!-- Right: content -->
+        <div>
+            <div class="tabs">
+                <a href="{{ url_for('profile', user_id=profile_user.id) }}" class="tab active">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                            d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a1.75 1.75 0 0 1-1.75-1.75Z" />
+                    </svg>
+                    Snippets
+                    <span class="tab-count">{{ posts|length }}</span>
+                </a>
+            </div>
 
-        <div class="profile-section">
-            <h2 class="section-title">Public Posts</h2>
+            <!-- Bio -->
+            {% if profile_user.bio %}
+            <div class="profile-bio">{{ profile_user.bio }}</div>
+            {% endif %}
+
+            <!-- Posts -->
             {% if posts %}
-            <div class="posts-grid">
+            <div class="item-list">
                 {% for post in posts %}
-                <article class="post-card">
-                    <h3 class="post-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
-                    </h3>
-                    <p class="post-preview">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
-                    <div class="post-footer">
-                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
-                        <span class="post-id">ID: {{ post.id }}</span>
+                <div class="item-row">
+                    <div class="item-icon">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path
+                                d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 11 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688Z" />
+                        </svg>
                     </div>
-                </article>
+                    <div style="flex:1;min-width:0;">
+                        <div class="item-name"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title
+                                }}</a></div>
+                        <div class="text-xs text-muted mt-1">Updated {{ post.created_at[:10] if post.created_at else ''
+                            }}</div>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
             {% else %}
             <div class="empty-state">
-                <span class="empty-icon">📝</span>
-                <p>No public posts yet.</p>
+                <div class="empty-state-icon">📄</div>
+                <div class="empty-state-title">No public snippets</div>
+                <div class="empty-state-desc">{{ profile_user.username }} hasn't shared any public snippets yet.</div>
             </div>
             {% endif %}
-        </div>
-
-        <!-- IDOR Hint -->
-        <div class="hint-box hint-vuln">
-            <span class="hint-title">🔍 IDOR Hint</span>
-            <p>Try accessing other user profiles: <code>/profile/1</code>, <code>/profile/2</code>,
-                <code>/profile/3</code></p>
-            <p>Also try: <code>/api/user/1</code> — exposes password hashes!</p>
         </div>
     </div>
 </div>

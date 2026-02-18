@@ -1,116 +1,183 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — InsecureHub{% endblock %}
+{% block title %}Dashboard — DevVault{% endblock %}
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Welcome back, <span class="gradient-text">{{ session.username }}</span>
-            {% if session.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
-        </p>
-    </div>
-    <div class="page-actions">
-        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">+ New Post</a>
-        <a href="{{ url_for('upload_file') }}" class="btn btn-ghost btn-sm">↑ Upload File</a>
-        <a href="{{ url_for('new_note') }}" class="btn btn-ghost btn-sm">+ Note</a>
-    </div>
-</div>
-
-<div class="dashboard-grid">
-    <!-- Quick Links -->
-    <div class="dash-card dash-wide">
-        <h2 class="card-title">🛠 Vulnerability Playground</h2>
-        <div class="vuln-grid">
-            <a href="{{ url_for('render_template_page') }}" class="vuln-card">
-                <span class="vuln-icon">🔥</span>
-                <span class="vuln-name">SSTI</span>
-                <span class="vuln-desc">Template Injection</span>
-            </a>
-            <a href="{{ url_for('fetch_url') }}" class="vuln-card">
-                <span class="vuln-icon">🌐</span>
-                <span class="vuln-name">SSRF</span>
-                <span class="vuln-desc">URL Fetcher</span>
-            </a>
-            <a href="{{ url_for('search') }}" class="vuln-card">
-                <span class="vuln-icon">💉</span>
-                <span class="vuln-name">SQLi</span>
-                <span class="vuln-desc">Search Bar</span>
-            </a>
-            <a href="{{ url_for('notes') }}" class="vuln-card">
-                <span class="vuln-icon">🔓</span>
-                <span class="vuln-name">IDOR</span>
-                <span class="vuln-desc">Notes & Files</span>
-            </a>
-            <a href="{{ url_for('read_file') }}" class="vuln-card">
-                <span class="vuln-icon">📂</span>
-                <span class="vuln-name">Path Traversal</span>
-                <span class="vuln-desc">File Reader</span>
-            </a>
-            <a href="{{ url_for('login') }}" class="vuln-card">
-                <span class="vuln-icon">🍪</span>
-                <span class="vuln-name">Pickle RCE</span>
-                <span class="vuln-desc">Remember-Me Cookie</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- My Posts -->
-    <div class="dash-card">
-        <h2 class="card-title">📝 My Posts</h2>
-        {% if posts %}
-        <div class="item-list">
-            {% for post in posts %}
-            <div class="item-row">
-                <div class="item-info">
-                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="item-title">{{ post.title }}</a>
-                    <span class="item-meta">ID: {{ post.id }} · {% if post.is_private %}<span
-                            class="badge-private">Private</span>{% else %}<span class="badge-public">Public</span>{%
-                        endif %}</span>
+<div class="container">
+    <div class="dash-grid">
+        <!-- Left: Activity -->
+        <div>
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <div class="page-subtitle">Welcome back, {{ session.username }}</div>
+                </div>
+                <div class="page-actions">
+                    <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-sm">New snippet</a>
+                    <a href="{{ url_for('upload_file') }}" class="btn btn-default btn-sm">Upload file</a>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state-sm">No posts yet.</div>
-        {% endif %}
-    </div>
 
-    <!-- My Files -->
-    <div class="dash-card">
-        <h2 class="card-title">📁 My Files</h2>
-        {% if files %}
-        <div class="item-list">
-            {% for file in files %}
-            <div class="item-row">
-                <div class="item-info">
-                    <a href="{{ url_for('download_file', file_id=file.id) }}" class="item-title">{{ file.filename }}</a>
-                    <span class="item-meta">ID: {{ file.id }} · {% if file.is_private %}<span
-                            class="badge-private">Private</span>{% else %}<span class="badge-public">Public</span>{%
-                        endif %}</span>
+            <!-- Quick stats -->
+            <div class="stats-row mb-3">
+                <div class="stat-box">
+                    <div class="stat-num">{{ posts|length }}</div>
+                    <div class="stat-label">Snippets</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ files|length }}</div>
+                    <div class="stat-label">Files</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ session.role|capitalize }}</div>
+                    <div class="stat-label">Role</div>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state-sm">No files uploaded.</div>
-        {% endif %}
-    </div>
 
-    <!-- Profile Quick View -->
-    <div class="dash-card">
-        <h2 class="card-title">👤 My Profile</h2>
-        <div class="profile-quick">
-            <div class="avatar avatar-lg">{{ session.username[0]|upper }}</div>
-            <div class="profile-quick-info">
-                <div class="profile-quick-name">{{ session.username }}</div>
-                <div class="profile-quick-role">{{ session.role }}</div>
+            <!-- Recent snippets -->
+            <div class="box mb-3">
+                <div class="box-header">
+                    <span class="box-header-title">Your snippets</span>
+                    <a href="{{ url_for('new_post') }}" class="btn btn-default btn-sm">New</a>
+                </div>
+                {% if posts %}
+                <div class="item-list" style="border:none;border-radius:0;">
+                    {% for post in posts %}
+                    <div class="item-row">
+                        <div class="item-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                <path
+                                    d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 11 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688Z" />
+                            </svg>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="item-name"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title
+                                    }}</a></div>
+                            <div class="text-xs text-muted mt-1">
+                                {% if post.is_private %}<span class="label label-gray">Private</span>{% else %}<span
+                                    class="label label-green">Public</span>{% endif %}
+                                &nbsp;Updated {{ post.created_at[:10] if post.created_at else '' }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="box-body">
+                    <div class="empty-state" style="padding:1.5rem;">
+                        <div class="empty-state-title">No snippets yet</div>
+                        <div class="empty-state-desc">Share your first code snippet with the community.</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent files -->
+            <div class="box">
+                <div class="box-header">
+                    <span class="box-header-title">Your files</span>
+                    <a href="{{ url_for('upload_file') }}" class="btn btn-default btn-sm">Upload</a>
+                </div>
+                {% if files %}
+                <div class="item-list" style="border:none;border-radius:0;">
+                    {% for file in files %}
+                    <div class="item-row">
+                        <div class="item-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                                <path
+                                    d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688Z" />
+                            </svg>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="item-name">{{ file.filename }}</div>
+                            <div class="text-xs text-muted mt-1">
+                                {% if file.is_private %}<span class="label label-gray">Private</span>{% else %}<span
+                                    class="label label-green">Public</span>{% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('download_file', file_id=file.id) }}"
+                                class="btn btn-default btn-sm">Download</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="box-body">
+                    <div class="empty-state" style="padding:1.5rem;">
+                        <div class="empty-state-title">No files uploaded</div>
+                        <div class="empty-state-desc">Upload files to store and share them.</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
-        <div class="profile-quick-actions">
-            <a href="{{ url_for('profile', user_id=session.user_id) }}" class="btn btn-ghost btn-sm btn-full">View
-                Profile</a>
-            <a href="{{ url_for('edit_profile') }}" class="btn btn-ghost btn-sm btn-full">Edit Profile</a>
-            <a href="{{ url_for('render_bio', user_id=session.user_id) }}" class="btn btn-ghost btn-sm btn-full">View
-                Bio (SSTI)</a>
+
+        <!-- Right sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Profile</div>
+                <div class="sidebar-body">
+                    <div class="d-flex align-center gap-md mb-2">
+                        <div class="avatar avatar-md">{{ session.username[0]|upper }}</div>
+                        <div>
+                            <div style="font-weight:600;font-size:0.875rem;">{{ session.username }}</div>
+                            <div class="text-xs text-muted">{{ session.role|capitalize }}</div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('profile', user_id=session.user_id) }}"
+                        class="btn btn-default btn-sm btn-full mb-1">View profile</a>
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-default btn-sm btn-full">Edit profile</a>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">Quick links</div>
+                <div class="sidebar-body" style="padding:0;">
+                    <a href="{{ url_for('notes') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M0 3.75C0 2.784.784 2 1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25Zm1.75-.25a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25ZM3.5 6.25a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Zm.75 2.25h4a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1 0-1.5Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">My notes</span>
+                    </a>
+                    <a href="{{ url_for('files') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">File manager</span>
+                    </a>
+                    <a href="{{ url_for('fetch_url') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">URL Previewer</span>
+                    </a>
+                    <a href="{{ url_for('render_template_page') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">Template renderer</span>
+                    </a>
+                    <a href="{{ url_for('search') }}" class="sidebar-item"
+                        style="padding:0.5rem 0.875rem;display:flex;gap:0.5rem;align-items:center;text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"
+                            style="color:var(--text-muted);">
+                            <path
+                                d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z" />
+                        </svg>
+                        <span style="font-size:0.875rem;color:var(--text-secondary);">Search</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

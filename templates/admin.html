@@ -1,69 +1,113 @@
 {% extends "base.html" %}
-{% block title %}Admin Panel — InsecureHub{% endblock %}
+{% block title %}Site administration — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container">
     <div class="page-header">
-        <h1 class="page-title">⚙ Admin Panel</h1>
-        <p class="page-subtitle">Full system access — admin only</p>
+        <div>
+            <h1 class="page-title">Site administration</h1>
+            <div class="page-subtitle">Manage users, content, and platform settings</div>
+        </div>
     </div>
 
-    <div class="admin-grid">
-        <div class="dash-card">
-            <h2 class="card-title">👥 All Users</h2>
-            <div class="item-list">
-                {% for user in users %}
-                <div class="item-row">
-                    <div class="item-info">
-                        <span class="item-title">{{ user.username }}
-                            {% if user.role == 'admin' %}<span class="role-badge role-admin">Admin</span>{% endif %}
-                        </span>
-                        <span class="item-meta">
-                            ID: {{ user.id }} · {{ user.email or 'No email' }}
-                        </span>
-                        <span class="item-meta">
-                            Password hash: <code class="code-inline">{{ user.password }}</code>
-                        </span>
-                    </div>
-                    <div class="item-actions">
-                        <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-ghost btn-xs">Profile</a>
-                        {% if user.id != session.user_id %}
-                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}"
-                            style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-xs"
-                                onclick="return confirm('Delete user?')">Delete</button>
-                        </form>
-                        {% endif %}
-                    </div>
+    <div class="layout-with-sidebar">
+        <div>
+            <!-- Users table -->
+            <div class="box mb-3">
+                <div class="box-header">
+                    <span class="box-header-title">Users ({{ users|length }})</span>
                 </div>
-                {% endfor %}
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Password hash</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td style="color:var(--text-muted);">{{ user.id }}</td>
+                                <td>
+                                    <a href="{{ url_for('profile', user_id=user.id) }}" style="font-weight:600;">{{
+                                        user.username }}</a>
+                                </td>
+                                <td style="color:var(--text-secondary);">{{ user.email or '—' }}</td>
+                                <td>
+                                    {% if user.role == 'admin' %}
+                                    <span class="label label-purple">Admin</span>
+                                    {% else %}
+                                    <span class="label label-gray">User</span>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ user.password }}</code></td>
+                                <td>
+                                    {% if user.id != session.user_id %}
+                                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Delete {{ user.username }}?')">Delete</button>
+                                    </form>
+                                    {% else %}
+                                    <span style="font-size:0.8125rem;color:var(--text-muted);">You</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Posts table -->
+            <div class="box">
+                <div class="box-header">
+                    <span class="box-header-title">Snippets ({{ posts|length }})</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Visibility</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in posts %}
+                            <tr>
+                                <td style="color:var(--text-muted);">{{ post.id }}</td>
+                                <td><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a></td>
+                                <td><a href="{{ url_for('profile', user_id=post.user_id) }}">{{ post.username }}</a>
+                                </td>
+                                <td>
+                                    {% if post.is_private %}<span class="label label-gray">Private</span>
+                                    {% else %}<span class="label label-green">Public</span>{% endif %}
+                                </td>
+                                <td style="color:var(--text-secondary);">{{ post.created_at[:10] if post.created_at else
+                                    '—' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="dash-card">
-            <h2 class="card-title">📝 All Posts</h2>
-            <div class="item-list">
-                {% for post in posts %}
-                <div class="item-row">
-                    <div class="item-info">
-                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="item-title">{{ post.title }}</a>
-                        <span class="item-meta">
-                            By: {{ post.username }} · ID: {{ post.id }}
-                            · {% if post.is_private %}<span class="badge-private">Private</span>{% else %}<span
-                                class="badge-public">Public</span>{% endif %}
-                        </span>
-                    </div>
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Quick actions</div>
+                <div class="sidebar-body" style="display:flex;flex-direction:column;gap:0.5rem;">
+                    <a href="{{ url_for('debug_info') }}" class="btn btn-default btn-sm">System info</a>
+                    <a href="/api/user/1" class="btn btn-default btn-sm">API: users</a>
+                    <a href="/api/note/1" class="btn btn-default btn-sm">API: notes</a>
                 </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="dash-card dash-wide">
-            <h2 class="card-title">🔧 Quick Actions</h2>
-            <div class="admin-actions">
-                <a href="{{ url_for('debug_info') }}" class="btn btn-ghost btn-sm">View Debug Info</a>
-                <a href="/api/user/1" class="btn btn-ghost btn-sm">API: User 1</a>
-                <a href="/api/note/1" class="btn btn-ghost btn-sm">API: Note 1</a>
-                <a href="{{ url_for('restore_session') }}" class="btn btn-ghost btn-sm">Restore Session (Pickle)</a>
             </div>
         </div>
     </div>

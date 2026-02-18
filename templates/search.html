@@ -1,58 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Search — InsecureHub{% endblock %}
+{% block title %}Search — DevVault{% endblock %}
 {% block content %}
-<div class="page-container">
+<div class="container">
     <div class="page-header">
-        <h1 class="page-title">Search Posts</h1>
-        <p class="page-subtitle">Search through public posts — SQL injection vulnerability active</p>
+        <h1 class="page-title">Search results{% if query %} for "{{ query }}"{% endif %}</h1>
     </div>
 
-    <div class="search-bar-wrap">
-        <form method="GET" action="{{ url_for('search') }}" class="search-form" id="search-form">
-            <input type="text" name="q" id="search-input" class="search-input"
-                placeholder="Search posts... try: ' OR 1=1--" value="{{ query }}" />
-            <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
-        </form>
-    </div>
+    <div class="layout-with-sidebar">
+        <div>
+            <!-- Search bar -->
+            <form method="GET" action="{{ url_for('search') }}" style="margin-bottom:1.5rem;" id="search-form">
+                <div style="display:flex;gap:0.5rem;">
+                    <input type="text" name="q" id="search-input" class="form-input" placeholder="Search snippets..."
+                        value="{{ query }}" style="flex:1;" />
+                    <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
+                </div>
+            </form>
 
-    {% if query %}
-    <div class="search-meta">
-        Results for: <strong>"{{ query }}"</strong>
-        {% if results %}— {{ results|length }} found{% endif %}
-    </div>
-    {% endif %}
-
-    {% if results %}
-    <div class="posts-grid">
-        {% for post in results %}
-        <article class="post-card">
-            <div class="post-card-header">
-                <span class="post-author">{{ post.username }}</span>
-                <span class="post-date">{{ post.created_at[:10] if post.created_at else '' }}</span>
+            {% if results %}
+            <div style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem;">
+                {{ results|length }} result{% if results|length != 1 %}s{% endif %}
             </div>
-            <h3 class="post-title"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a></h3>
-            <p class="post-preview">{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
-            <div class="post-footer">
-                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-ghost btn-xs">Read →</a>
-                <span class="post-id">ID: {{ post.id }}</span>
+            <div class="item-list">
+                {% for post in results %}
+                <div class="item-row">
+                    <div class="item-icon">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                            <path
+                                d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 11 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688Z" />
+                        </svg>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="item-name"><a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title
+                                }}</a></div>
+                        <div class="text-xs text-muted mt-1">
+                            by <a href="{{ url_for('profile', user_id=post.user_id) }}"
+                                style="color:var(--text-secondary);">{{ post.username }}</a>
+                            &nbsp;·&nbsp; {{ post.created_at[:10] if post.created_at else '' }}
+                        </div>
+                        <div class="text-sm text-muted" style="margin-top:0.25rem;">
+                            {{ post.content[:120] }}{% if post.content|length > 120 %}…{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </article>
-        {% endfor %}
-    </div>
-    {% elif query %}
-    <div class="empty-state">
-        <span class="empty-icon">🔍</span>
-        <p>No results found for "{{ query }}"</p>
-    </div>
-    {% endif %}
+            {% elif query %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <div class="empty-state-title">No results found</div>
+                <div class="empty-state-desc">We couldn't find any snippets matching "{{ query }}".</div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <div class="empty-state-title">Search DevVault</div>
+                <div class="empty-state-desc">Find code snippets shared by the community.</div>
+            </div>
+            {% endif %}
+        </div>
 
-    <div class="hint-box hint-vuln">
-        <span class="hint-title">💉 SQLi Payloads to Try</span>
-        <div class="payload-list">
-            <code>' OR 1=1--</code>
-            <code>' UNION SELECT 1,2,3,4,5,6,7--</code>
-            <code>' UNION SELECT username,password,email,4,5,6,7 FROM users--</code>
-            <code>' AND 1=2 UNION SELECT id,username,password,email,bio,role,reset_token FROM users--</code>
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Search tips</div>
+                <div class="sidebar-body">
+                    <p style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;">
+                        Search by snippet title. Results show public snippets from all users.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
